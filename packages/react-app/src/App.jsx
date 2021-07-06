@@ -21,6 +21,7 @@ import {
 } from "./hooks";
 // import Hints from "./Hints";
 import { ExampleUI, Hints, Subgraph } from "./views";
+import SecretList from "./components/Secret/SecretList";
 
 const { ethers } = require("ethers");
 /*
@@ -46,7 +47,7 @@ const { ethers } = require("ethers");
 const targetNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
-const DEBUG = true;
+const DEBUG = false;
 const NETWORKCHECK = false;
 
 // 🛰 providers
@@ -185,10 +186,10 @@ function App(props) {
   ]);
 
   // keep track of a variable from the contract in the local React state:
-  const purpose = useContractReader(readContracts, "YourContract", "purpose");
+  // const secretIds = useContractReader(readContracts, "Secrets", "getIds");
 
   // 📟 Listen for broadcast events
-  const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
+  // const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
 
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
@@ -346,128 +347,9 @@ function App(props) {
       {/* ✏️ Edit the header and change the title to your project name */}
       <Header />
       {networkDisplay}
+
       <BrowserRouter>
-        <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
-          <Menu.Item key="/">
-            <Link
-              onClick={() => {
-                setRoute("/");
-              }}
-              to="/"
-            >
-              YourContract
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/hints">
-            <Link
-              onClick={() => {
-                setRoute("/hints");
-              }}
-              to="/hints"
-            >
-              Hints
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/exampleui">
-            <Link
-              onClick={() => {
-                setRoute("/exampleui");
-              }}
-              to="/exampleui"
-            >
-              ExampleUI
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/mainnetdai">
-            <Link
-              onClick={() => {
-                setRoute("/mainnetdai");
-              }}
-              to="/mainnetdai"
-            >
-              Mainnet DAI
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/subgraph">
-            <Link
-              onClick={() => {
-                setRoute("/subgraph");
-              }}
-              to="/subgraph"
-            >
-              Subgraph
-            </Link>
-          </Menu.Item>
-        </Menu>
-
-        <Switch>
-          <Route exact path="/">
-            {/*
-                🎛 this scaffolding is full of commonly used components
-                this <Contract/> component will automatically parse your ABI
-                and give you a form to interact with it locally
-            */}
-
-            <Contract
-              name="Secrets"
-              signer={userSigner}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-            />
-          </Route>
-          <Route path="/hints">
-            <Hints
-              address={address}
-              yourLocalBalance={yourLocalBalance}
-              mainnetProvider={mainnetProvider}
-              price={price}
-            />
-          </Route>
-          <Route path="/exampleui">
-            <ExampleUI
-              address={address}
-              userSigner={userSigner}
-              mainnetProvider={mainnetProvider}
-              localProvider={localProvider}
-              yourLocalBalance={yourLocalBalance}
-              price={price}
-              tx={tx}
-              writeContracts={writeContracts}
-              readContracts={readContracts}
-              purpose={purpose}
-              setPurposeEvents={setPurposeEvents}
-            />
-          </Route>
-          <Route path="/mainnetdai">
-            <Contract
-              name="DAI"
-              customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.DAI}
-              signer={userSigner}
-              provider={mainnetProvider}
-              address={address}
-              blockExplorer="https://etherscan.io/"
-            />
-            {/*
-            <Contract
-              name="UNI"
-              customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.UNI}
-              signer={userSigner}
-              provider={mainnetProvider}
-              address={address}
-              blockExplorer="https://etherscan.io/"
-            />
-            */}
-          </Route>
-          <Route path="/subgraph">
-            <Subgraph
-              subgraphUri={props.subgraphUri}
-              tx={tx}
-              writeContracts={writeContracts}
-              mainnetProvider={mainnetProvider}
-            />
-          </Route>
-        </Switch>
+        <SecretList tx={tx} address={address} readContracts={readContracts} writeContracts={writeContracts} />
       </BrowserRouter>
 
       <ThemeSwitch />
