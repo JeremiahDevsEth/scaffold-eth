@@ -20,11 +20,11 @@ contract Secrets {
         return secrets[entity_id].is_entity;
     }
 
-    function getCount() public view returns (uint) {
+    function getCount() external view returns (uint) {
         return secretIds.length;
     }
 
-    function getPaginatedSecrets(uint256 cursor, uint256 limit) public view returns (Secret[] memory values, uint256 newCursor, bool isEnd){
+    function getPaginatedSecrets(uint256 cursor, uint256 limit) external view returns (Secret[] memory values, uint256 newCursor, bool isEnd){
         if (cursor >= secretIds.length) {
             cursor = secretIds.length - 1;
         }
@@ -40,7 +40,7 @@ contract Secrets {
         return (values, (limit > cursor) ? 0 : cursor - limit, (limit > cursor) ? true : false);
     }
 
-    function add(string memory text) public {
+    function add(string calldata text) external {
         require(bytes(text).length > 0, "Error: Message must not be empty!");
         bytes32 identifier = keccak256(abi.encodePacked(msg.sender, text, block.timestamp));
 
@@ -58,7 +58,7 @@ contract Secrets {
         secrets[identifier] = newSecret;
     }
 
-    function getUserLike(address user, bytes32 entity_id) public view returns (bool) {
+    function getUserLike(address user, bytes32 entity_id) external view returns (bool) {
         return likes[user][entity_id];
     }
 
@@ -74,7 +74,7 @@ contract Secrets {
         }
     }
 
-    function getUserReport(address user, bytes32 entity_id) public view returns (bool) {
+    function getUserReport(address user, bytes32 entity_id) external view returns (bool) {
         return reports[user][entity_id];
     }
 
