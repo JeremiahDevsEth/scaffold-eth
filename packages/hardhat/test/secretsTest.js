@@ -1,3 +1,4 @@
+const { formatBytes32String } = require("ethers/lib/utils");
 const { ethers } = require("hardhat");
 const { use, expect } = require("chai");
 const { solidity } = require("ethereum-waffle");
@@ -97,6 +98,16 @@ describe("DeSec", () => {
         expect(await getLikes()).to.equal(0);
       });
 
+      it("Should throw an error if id passed does not exists", async () => {
+        const [signer] = await ethers.getSigners();
+        try {
+          await secretsContract.connect(signer).like(formatBytes32String("non_existing_id"));
+          expect.fail("The transaction should have already thrown an error");
+        } catch (err) {
+          expect(err.message).to.include("This message does not exists");
+        }
+      });
+
       it("Should add likes from different users", async () => {
         const [
           signer1,
@@ -139,6 +150,16 @@ describe("DeSec", () => {
         const [signer] = await ethers.getSigners();
         expect(await report(signer)).to.equal(false);
         expect(await getReports()).to.equal(0);
+      });
+
+      it("Should throw an error if id passed does not exists", async () => {
+        const [signer] = await ethers.getSigners();
+        try {
+          await secretsContract.connect(signer).report(formatBytes32String("non_existing_id"));
+          expect.fail("The transaction should have already thrown an error");
+        } catch (err) {
+          expect(err.message).to.include("This message does not exists");
+        }
       });
 
       it("Should add reports from different users", async () => {
