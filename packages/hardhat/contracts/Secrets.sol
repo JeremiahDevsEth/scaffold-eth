@@ -2,6 +2,10 @@
 pragma solidity ^0.8.0;
 
 contract Secrets {
+    event NewSecret(Secret newSecret);
+    event NewLike(address sender , Secret secret, bool status);
+    event NewReport(address sender, Secret secret, bool status);
+
     struct Secret {
         bytes32 entity_id;
         string text;
@@ -56,6 +60,8 @@ contract Secrets {
         );
         secretIds.push(identifier);
         secrets[identifier] = newSecret;
+
+        emit NewSecret(newSecret);
     }
 
     function getUserLike(address user, bytes32 entity_id) external view returns (bool) {
@@ -64,14 +70,18 @@ contract Secrets {
 
     function like(bytes32 entity_id) external {
         require(isEntity(entity_id), "Error: This message does not exists.");
+        bool status;
 
         if (likes[msg.sender][entity_id]) {
             delete likes[msg.sender][entity_id];
             secrets[entity_id].likes--;
+            status = false;
         } else {
             likes[msg.sender][entity_id] = true;
             secrets[entity_id].likes++;
+            status = true;
         }
+        emit NewLike(msg.sender, secrets[entity_id], status);
     }
 
     function getUserReport(address user, bytes32 entity_id) external view returns (bool) {
@@ -80,13 +90,17 @@ contract Secrets {
 
     function report(bytes32 entity_id) external {
         require(isEntity(entity_id), "Error: This message does not exists.");
+        bool status;
 
         if (reports[msg.sender][entity_id]) {
             delete reports[msg.sender][entity_id];
             secrets[entity_id].reports--;
+            status = false;
         } else {
             reports[msg.sender][entity_id] = true;
             secrets[entity_id].reports++;
+            status = true;
         }
+        emit NewReport(msg.sender, secrets[entity_id], status);
     }
 }
