@@ -3,23 +3,26 @@ schema:
   file: ./src/schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: YourContract
+    name: Secrets
     network: localhost
     source:
-      address: "{{localhost_YourContractAddress}}"
-      abi: YourContract
+      address: "{{localhost_SecretsAddress}}"
+      abi: Secrets
       startBlock: 1
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - Purpose
-        - Sender
+        - Secret
       abis:
-        - name: YourContract
-          file: ./abis/localhost_YourContract.json
+        - name: Secrets
+          file: ./abis/localhost_Secrets.json
       eventHandlers:
-        - event: SetPurpose(address,string)
-          handler: handleSetPurpose
+        - event: NewSecret((bytes32,string,uint256,uint256,uint256,bool))
+          handler: handleNewSecret
+        - event: NewLike(address,(bytes32,string,uint256,uint256,uint256,bool),bool)
+          handler: handleNewLike
+        - event: NewReport(address,(bytes32,string,uint256,uint256,uint256,bool),bool)
+          handler: handleNewReport
       file: ./src/mapping.ts

@@ -1,34 +1,56 @@
-import { BigInt, Address } from "@graphprotocol/graph-ts"
-import {
-  YourContract,
-  SetPurpose
-} from "../generated/YourContract/YourContract"
-import { Purpose, Sender } from "../generated/schema"
+import { NewLike, NewReport, NewSecret } from "../generated/Secrets/Secrets"
+import { Like, Report, Secret } from "../generated/schema"
+import { store, } from "@graphprotocol/graph-ts";
 
-export function handleSetPurpose(event: SetPurpose): void {
+export function handleNewSecret(event: NewSecret): void {
+  let secretId = event.params.newSecret.entity_id.toHexString();
+  let secret = Secret.load(secretId);
 
-  let senderString = event.params.sender.toHexString()
-
-  let sender = Sender.load(senderString)
-
-  if (sender == null) {
-    sender = new Sender(senderString)
-    sender.address = event.params.sender
-    sender.createdAt = event.block.timestamp
-    sender.purposeCount = BigInt.fromI32(1)
-  }
-  else {
-    sender.purposeCount = sender.purposeCount.plus(BigInt.fromI32(1))
+  if (secret == null) {
+    secret = new Secret(secretId);
+    secret.text = event.params.newSecret.text;
+    secret.likes = event.params.newSecret.likes;
+    secret.reports = event.params.newSecret.reports;
+    secret.created_at = event.params.newSecret.created_at;
   }
 
-  let purpose = new Purpose(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  secret.save();
+}
 
-  purpose.purpose = event.params.purpose
-  purpose.sender = senderString
-  purpose.createdAt = event.block.timestamp
-  purpose.transactionHash = event.transaction.hash.toHex()
+export function handleNewLike(event: NewLike): void {
+  let likeId = event.params.sender.toHexString().concat("_").concat(event.params.secret.entity_id.toHexString());
+  let like = Like.load(likeId);
+  let secret = Secret.load(event.params.secret.entity_id.toHexString());
 
-  purpose.save()
-  sender.save()
+  if (like == null) {
+    like = new Like(likeId);
+    like.address = event.params.sender;
+    like.secret = event.params.secret.entity_id.toHexString();
+    like.status = event.params.status;
+  } else {
+    store.remove("Like", like.id);
+  }
+  secret.likes = event.params.secret.likes;
 
+  like.save();
+  secret.save();
+}
+
+export function handleNewReport(event: NewReport): void {
+  let reportId = event.params.sender.toHexString().concat("_").concat(event.params.secret.entity_id.toHexString());
+  let report = Report.load(reportId);
+  let secret = Secret.load(event.params.secret.entity_id.toHexString());
+
+  if (report == null) {
+    report = new Report(reportId);
+    report.address = event.params.sender;
+    report.secret = event.params.secret.entity_id.toHexString();
+    report.status = event.params.status;
+  } else {
+    store.remove("Report", report.id);
+  }
+  secret.reports = event.params.secret.reports;
+
+  report.save();
+  secret.save();
 }

@@ -1,15 +1,21 @@
-type Purpose @entity {
+type Secret @entity {
   id: ID!
-  sender: Sender!
-  purpose: String!
-  createdAt: BigInt!
-  transactionHash: String!
+  text: String!
+  likes: BigInt!
+  reports: BigInt!
+  created_at: BigInt!
 }
 
-type Sender @entity {
+type Like @entity {
   id: ID!
   address: Bytes!
-  purposes: [Purpose!] @derivedFrom(field: "sender")
-  createdAt: BigInt!
-  purposeCount: BigInt!
+  secret: Secret!
+  status: Boolean!
+}
+
+type Report @entity {
+  id: ID!
+  address: Bytes!
+  secret: Secret!
+  status: Boolean!
 }
