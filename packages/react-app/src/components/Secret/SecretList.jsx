@@ -1,11 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, List, Spin, Statistic } from "antd";
+import { Button, Card, List, Spin, Statistic, Table, Typography } from "antd";
+import { gql, useQuery } from "@apollo/client";
 import SecretLikeButton from "./SecretLikeButton";
 import SecretReportButton from "./SecretReportButton";
 import SecretInput from "./SecretInput";
 import ConfigData from "../../config.json";
 
 const SecretList = ({ tx, address, readContracts, writeContracts }) => {
+  const SECRETS_GRAPHQL = `
+  {
+    secrets(orderBy: created_at, orderDirection: desc) {
+      id
+      text
+      likes
+      reports
+      created_at
+    }
+  }
+  `;
+  const SECRETS_GQL = gql(SECRETS_GRAPHQL);
+
+  const { loading, data } = useQuery(SECRETS_GQL, { pollInterval: 2500 });
   const [secretCount, setSecretCount] = useState(0);
   const [secrets, setSecrets] = useState([]);
   const [cursor, setCursor] = useState();
@@ -66,6 +81,39 @@ const SecretList = ({ tx, address, readContracts, writeContracts }) => {
     }
   };
 
+  const secretColumns = [
+    {
+      title: "Id",
+      dataIndex: "id",
+      key: "id",
+    },
+    {
+      title: "Message",
+      dataIndex: "text",
+      key: "text",
+    },
+    {
+      title: "Likes",
+      dataIndex: "likes",
+      key: "likes",
+    },
+    {
+      title: "Reports",
+      dataIndex: "reports",
+      key: "reports",
+    },
+    {
+      title: "createdAt",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: d => new Date(d * 1000).toISOString(),
+    },
+  ];
+
+  const deployWarning = (
+    <div style={{ marginTop: 8, padding: 8 }}>Warning: 🤔 Have you deployed your subgraph yet?</div>
+  );
+
   return (
     <>
       <SecretInput tx={tx} writeContracts={writeContracts} refreshButton={refreshButton} />
@@ -115,6 +163,11 @@ const SecretList = ({ tx, address, readContracts, writeContracts }) => {
         >
           Load More
         </Button>
+        {data ? (
+          <Table dataSource={data.secrets} columns={secretColumns} rowKey="id" />
+        ) : (
+          <Typography>{loading ? "Loading..." : deployWarning}</Typography>
+        )}
       </Spin>
     </>
   );

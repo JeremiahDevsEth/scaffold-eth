@@ -1,12 +1,12 @@
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import WalletLink from "walletlink";
-import { Alert, Button, Col, Menu, Row } from "antd";
+import { Alert, Button, Col, List, Menu, Row } from "antd";
 import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import Web3Modal from "web3modal";
 import "./App.css";
-import { Account, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
+import { Account, Address, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
 import { Transactor } from "./helpers";
 import {
@@ -189,7 +189,7 @@ function App(props) {
   // const secretIds = useContractReader(readContracts, "Secrets", "getIds");
 
   // 📟 Listen for broadcast events
-  // const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
+  const newSecretEvents = useEventListener(readContracts, "Secrets", "NewSecret", localProvider, 1);
 
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
@@ -350,6 +350,17 @@ function App(props) {
 
       <BrowserRouter>
         <SecretList tx={tx} address={address} readContracts={readContracts} writeContracts={writeContracts} />
+        <List
+          bordered
+          dataSource={newSecretEvents}
+          renderItem={item => {
+            return (
+              <List.Item key={item.newSecret.entity_id.toString()}>
+                {item.newSecret.entity_id.toString()}
+              </List.Item>
+            );
+          }}
+        />
       </BrowserRouter>
 
       <ThemeSwitch />
